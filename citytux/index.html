@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CityTux — Tu ciudad, en tus manos</title>
+  <meta name="description" content="Reporta baches, fugas, luminarias y más en Tuxtla Gutiérrez y da seguimiento a su estado.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%8D%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Íconos SVG -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-bache" viewBox="0 0 24 24"><ellipse cx="12" cy="16" rx="8" ry="3.5"/><path d="M4 16v-2.5M20 16v-2.5"/><path d="M8 8l1.6 2.2M12 5.5v3.3M16 8l-1.6 2.2"/></symbol>
+    <symbol id="i-luminaria" viewBox="0 0 24 24"><path d="M7 21h6"/><path d="M10 21V8a4 4 0 0 1 4-4h3"/><path d="M15.5 4h4.5l-1.5 4h-3z"/><path d="M17.5 11v2.5M14.8 10.8l-1.2 1.8M20.2 10.8l1.2 1.8"/></symbol>
+    <symbol id="i-fuga" viewBox="0 0 24 24"><path d="M12 3s6 6 6 10.5a6 6 0 0 1-12 0C6 9 12 3 12 3z"/><path d="M9.5 14.5a2.8 2.8 0 0 0 2.5 2.5"/></symbol>
+    <symbol id="i-basura" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-residuos" viewBox="0 0 24 24"><path d="M20.5 12A8.5 8.5 0 0 1 6 18"/><path d="M3.5 12A8.5 8.5 0 0 1 18 6"/><path d="M18.5 2.5V6.5h-4M5.5 21.5v-4h4"/></symbol>
+    <symbol id="i-limpieza" viewBox="0 0 24 24"><path d="M19 3l-6.5 9"/><path d="M7.5 13l7-1.5 3 3.5-2 6H5z"/><path d="M9 21l.8-5M13 21l-.4-4.6"/></symbol>
+    <symbol id="i-transito" viewBox="0 0 24 24"><rect x="7.5" y="2" width="9" height="20" rx="3"/><circle cx="12" cy="7" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="17" r="1.6"/></symbol>
+    <symbol id="i-inundacion" viewBox="0 0 24 24"><path d="M12 2.5s4.5 4.5 4.5 7.8a4.5 4.5 0 0 1-9 0C7.5 7 12 2.5 12 2.5z"/><path d="M2 16c2.2 0 2.2-1.8 4.5-1.8S8.7 16 11 16s2.2-1.8 4.5-1.8S17.7 16 20 16s1.3-.8 2-1.2"/><path d="M2 21c2.2 0 2.2-1.8 4.5-1.8S8.7 21 11 21s2.2-1.8 4.5-1.8S17.7 21 20 21s1.3-.8 2-1.2"/></symbol>
+    <symbol id="i-logo" viewBox="0 0 24 24"><path d="M3 19h18"/><path d="M5 19l4.5-9 3 5 2-3L19 19"/><path d="M9.5 10L12 5l2.5 5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l1.5-2.5h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 5a3 3 0 0 1 0 6M18 14.8c1.7.7 3 2.4 3 5.2"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H10l-4.5 4v-4H4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="brand" href="#inicio">
+      <span class="brand__mark"><svg class="ico"><use href="#i-logo"/></svg></span>
+      <span class="brand__name">CityTux</span>
+    </a>
+    <nav class="nav" id="nav">
+      <a href="#inicio" data-route="inicio">Inicio</a>
+      <a href="#reportar" data-route="reportar">Reportar</a>
+      <a href="#mapa" data-route="mapa">Mapa</a>
+      <a href="#comunidad" data-route="comunidad">Comunidad</a>
+      <a href="#mis-reportes" data-route="mis-reportes">Mis reportes</a>
+    </nav>
+    <div class="topbar__actions">
+      <button class="link-btn" data-soon>Iniciar sesión</button>
+      <button class="btn btn--outline" data-soon>Registrarse</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- INICIO -->
+  <section class="page" id="page-inicio">
+    <div class="hero">
+      <div class="hero__art" aria-hidden="true">
+        <svg viewBox="0 0 1600 520" preserveAspectRatio="xMidYMax slice">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#0b1a38"/><stop offset=".6" stop-color="#27456f"/><stop offset="1" stop-color="#d9a45b"/>
+            </linearGradient>
+            <linearGradient id="river" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#1c5a63"/><stop offset="1" stop-color="#0d2f3c"/>
+            </linearGradient>
+          </defs>
+          <rect width="1600" height="520" fill="url(#sky)"/>
+          <path d="M0 520V170l90 20 60 90 70 10 40 110 60 30 20 90z" fill="#0c1424"/>
+          <path d="M1600 520V120l-120 40-70 100-80 20-50 120-90 30-30 90z" fill="#0c1424"/>
+          <path d="M0 520V260l120 40 60 70 90 20 40 130z" fill="#16233b"/>
+          <path d="M1600 520V230l-140 50-60 80-110 30-40 130z" fill="#16233b"/>
+          <path d="M270 520l120-40h820l120 40z" fill="url(#river)"/>
+          <g stroke="#f3d79a" stroke-opacity=".35" stroke-width="2" fill="none">
+            <path d="M420 500h200M700 495h300M1050 502h160"/>
+          </g>
+        </svg>
+      </div>
+      <div class="hero__content">
+        <p class="hero__place">Tuxtla Gutiérrez, Chiapas</p>
+        <h1>Haz de Tuxtla<br>una mejor ciudad</h1>
+        <p class="hero__lead">Reporta incidencias urbanas de forma rápida y sencilla, y da seguimiento a su estado.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="#reportar"><svg class="ico"><use href="#i-plus"/></svg>Reportar ahora</a>
+          <a class="btn btn--glass" href="#mis-reportes"><svg class="ico"><use href="#i-search"/></svg>Consultar reporte</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <h2 class="section-title">Tipos de incidencia</h2>
+      <div class="cat-grid" id="homeCats"></div>
+
+      <div class="stats">
+        <div><strong id="stActivos" data-count="0">0</strong><span>Reportes activos</span></div>
+        <div><strong id="stProceso" data-count="0">0</strong><span>En proceso</span></div>
+        <div><strong id="stVecinos" data-count="0">0</strong><span>Vecinos sumados</span></div>
+      </div>
+
+      <h2 class="section-title">Zonas de la ciudad</h2>
+      <div class="zones" id="zones"></div>
+      <p class="tagline">Una ciudad más segura, limpia y conectada es posible.</p>
+    </div>
+  </section>
+
+  <!-- REPORTAR -->
+  <section class="page" id="page-reportar">
+    <div class="container container--narrow">
+      <h1 class="page-title">Nuevo reporte</h1>
+      <ol class="stepper" id="stepper">
+        <li><span>1</span>Información</li>
+        <li><span>2</span>Ubicación</li>
+        <li><span>3</span>Evidencia</li>
+        <li><span>4</span>Confirmar</li>
+      </ol>
+
+      <div class="card form">
+        <div class="step" data-step="0">
+          <h3>Tipo de incidencia</h3>
+          <div class="pick-grid" id="pickCats"></div>
+          <h3>Nivel de urgencia</h3>
+          <div class="urg-row" id="pickUrg">
+            <button type="button" data-u="alta">Alta</button>
+            <button type="button" data-u="media" class="is-on">Media</button>
+            <button type="button" data-u="baja">Baja</button>
+          </div>
+          <p class="hint" id="urgHint">Requiere atención pronta</p>
+          <h3>Descripción</h3>
+          <textarea id="desc" maxlength="500" placeholder="Describe el problema con detalle…"></textarea>
+          <p class="counter"><span id="descCount">0</span>/500</p>
+        </div>
+
+        <div class="step" data-step="1" hidden>
+          <h3>Dirección</h3>
+          <div class="field-row">
+            <input id="addr" type="text" placeholder="Ej. Av. Central y 5a Norte, Centro, Tuxtla Gutiérrez">
+            <button type="button" class="btn btn--outline btn--sm" id="btnLocate"><svg class="ico"><use href="#i-target"/></svg>Mi ubicación</button>
+          </div>
+          <div id="pickMap" class="map map--small"></div>
+          <p class="hint hint--center">Toca el mapa para marcar la ubicación exacta (obligatorio)</p>
+        </div>
+
+        <div class="step" data-step="2" hidden>
+          <h3>Agregar fotos</h3>
+          <label class="drop" id="drop">
+            <svg class="ico ico--lg"><use href="#i-camera"/></svg>
+            <strong>Arrastra o selecciona fotos</strong>
+            <small>PNG, JPG hasta 10 MB</small>
+            <input id="files" type="file" accept="image/png,image/jpeg" multiple hidden>
+          </label>
+          <div class="thumbs" id="thumbs"></div>
+        </div>
+
+        <div class="step" data-step="3" hidden>
+          <h3>Confirmar reporte</h3>
+          <dl class="summary" id="summary"></dl>
+        </div>
+
+        <p class="form-error" id="formError" role="alert" hidden></p>
+        <div class="form__nav">
+          <button type="button" class="btn btn--outline" id="btnBack">Atrás</button>
+          <button type="button" class="btn btn--primary" id="btnNext">Siguiente</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAPA -->
+  <section class="page" id="page-mapa">
+    <div class="container">
+      <div class="page-head">
+        <div><h1 class="page-title">Mapa de incidencias</h1><p class="muted">Reportes ciudadanos en Tuxtla Gutiérrez</p></div>
+        <div class="chips" id="mapFilters">
+          <button class="chip is-on" data-f="todas">Todas</button>
+          <button class="chip" data-f="alta"><i class="dot dot--alta"></i>Alta</button>
+          <button class="chip" data-f="media"><i class="dot dot--media"></i>Media</button>
+          <button class="chip" data-f="baja"><i class="dot dot--baja"></i>Baja</button>
+        </div>
+      </div>
+      <div class="map-wrap">
+        <div id="mainMap" class="map map--big"></div>
+        <div class="legend">
+          <strong>Urgencia</strong>
+          <span><i class="dot dot--alta"></i>Alta</span>
+          <span><i class="dot dot--media"></i>Media</span>
+          <span><i class="dot dot--baja"></i>Baja</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMUNIDAD -->
+  <section class="page" id="page-comunidad">
+    <div class="container container--feed">
+      <div class="page-head">
+        <div><h1 class="page-title">Comunidad</h1><p class="muted">Reportes ciudadanos · Súmate a los que más te afectan</p></div>
+        <button class="btn btn--outline" id="btnGps"><svg class="ico"><use href="#i-target"/></svg>Activar ubicación GPS</button>
+      </div>
+      <div class="chips" id="feedFilters">
+        <button class="chip is-on" data-f="todas">Todos</button>
+        <button class="chip" data-f="alta"><i class="dot dot--alta"></i>Alta</button>
+        <button class="chip" data-f="media"><i class="dot dot--media"></i>Media</button>
+        <button class="chip" data-f="baja"><i class="dot dot--baja"></i>Baja</button>
+        <span class="muted chips__count" id="feedCount"></span>
+      </div>
+      <div class="feed" id="feed"></div>
+    </div>
+  </section>
+
+  <!-- MIS REPORTES -->
+  <section class="page" id="page-mis-reportes">
+    <div class="container">
+      <div class="page-head">
+        <h1 class="page-title">Mis reportes</h1>
+        <a class="btn btn--primary" href="#reportar"><svg class="ico"><use href="#i-plus"/></svg>Nuevo reporte</a>
+      </div>
+      <div class="tabs" id="myTabs"></div>
+      <div class="list" id="myList"></div>
+    </div>
+  </section>
+</main>
+
+<!-- Chatbot -->
+<button class="chat-fab" id="chatFab" aria-label="Abrir asistente"><svg class="ico"><use href="#i-chat"/></svg></button>
+<aside class="chat" id="chat" hidden aria-label="Asistente CityTux">
+  <header class="chat__head">
+    <div><strong>Asistente CityTux</strong><small>Resuelve tus dudas al momento</small></div>
+    <button class="icon-btn" id="chatClose" aria-label="Cerrar"><svg class="ico"><use href="#i-close"/></svg></button>
+  </header>
+  <div class="chat__body" id="chatBody"></div>
+  <div class="chat__chips" id="chatChips"></div>
+  <form class="chat__form" id="chatForm" autocomplete="off">
+    <input id="chatInput" type="text" placeholder="Escribe tu duda…" aria-label="Mensaje">
+    <button class="icon-btn icon-btn--solid" aria-label="Enviar"><svg class="ico"><use href="#i-send"/></svg></button>
+  </form>
+</aside>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="js/chatbot.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
