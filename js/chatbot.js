@@ -112,7 +112,7 @@
         a.href = l.href;
         a.textContent = l.label;
         if (l.href.startsWith('http')) { a.target = '_blank'; a.rel = 'noopener'; }
-        else a.addEventListener('click', () => $('chat').hidden = window.innerWidth < 600);
+        else a.addEventListener('click', () => { if (window.innerWidth < 600) toggle(false); });
         box.appendChild(a);
       });
       el.appendChild(box);
@@ -146,12 +146,14 @@
   let greeted = false;
   function toggle(open) {
     $('chat').hidden = !open;
+    $('chatFab').setAttribute('aria-expanded', String(open));
     if (open && !greeted) {
       greeted = true;
       add('bot', 'Hola, soy el asistente de CityTux. Elige una opción o escribe tu duda.');
     }
-    if (open) $('chatInput').focus();
+    if (open) $('chatInput').focus(); else $('chatFab').focus();
   }
   $('chatFab').addEventListener('click', () => toggle($('chat').hidden));
   $('chatClose').addEventListener('click', () => toggle(false));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('chat').hidden) toggle(false); });
 })();

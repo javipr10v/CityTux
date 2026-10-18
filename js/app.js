@@ -2,19 +2,19 @@
 const TUXTLA = [16.7516, -93.1167];
 
 const CATS = {
-  bache:      { label: 'Baches',              single: 'Bache', icon: 'i-bache',      color: '#2f6bff' },
-  luminaria:  { label: 'Luminarias',          single: 'Luminaria', icon: 'i-luminaria',  color: '#f0a020' },
-  fuga:       { label: 'Fugas de agua',       single: 'Fuga de agua', icon: 'i-fuga',       color: '#3b82f6' },
-  basura:     { label: 'Basura',              single: 'Acumulación de basura', icon: 'i-basura',     color: '#e5484d' },
-  residuos:   { label: 'Gestión de residuos', single: 'Gestión de residuos', icon: 'i-residuos',   color: '#2fb36d' },
-  limpieza:   { label: 'Limpieza de calle',   single: 'Limpieza de calle', icon: 'i-limpieza',   color: '#64748b' },
-  transito:   { label: 'Tránsito y vialidad', single: 'Incidencia de tránsito', icon: 'i-transito',   color: '#8b5cf6' },
-  inundacion: { label: 'Inundaciones',        single: 'Inundación', icon: 'i-inundacion', color: '#0ea5b7' }
+  bache:      { label: 'Baches',              single: 'Bache',                  icon: 'i-bache',      img: 'img/icon-bache.webp' },
+  luminaria:  { label: 'Luminarias',          single: 'Luminaria',              icon: 'i-luminaria',  img: 'img/icon-luminaria.webp' },
+  fuga:       { label: 'Fugas de agua',       single: 'Fuga de agua',           icon: 'i-fuga',       img: 'img/icon-fuga.webp' },
+  basura:     { label: 'Basura',              single: 'Acumulación de basura',  icon: 'i-basura',     img: 'img/icon-basura.webp' },
+  residuos:   { label: 'Gestión de residuos', single: 'Gestión de residuos',    icon: 'i-residuos',   img: 'img/icon-residuos.webp' },
+  limpieza:   { label: 'Limpieza de calle',   single: 'Limpieza de calle',      icon: 'i-limpieza',   img: 'img/icon-limpieza.webp' },
+  transito:   { label: 'Tránsito y vialidad', single: 'Incidencia de tránsito', icon: 'i-transito',   img: 'img/icon-transito.webp' },
+  inundacion: { label: 'Inundaciones',        single: 'Inundación',             icon: 'i-inundacion', img: 'img/icon-inundacion.webp' }
 };
 const URG = {
-  alta:  { label: 'Alta',  color: '#e5484d', hint: 'Riesgo para personas o daño que crece rápido' },
-  media: { label: 'Media', color: '#f0a020', hint: 'Requiere atención pronta' },
-  baja:  { label: 'Baja',  color: '#2fb36d', hint: 'Molestia que puede esperar' }
+  alta:  { label: 'Alta',  color: '#d92d20', hint: 'Riesgo para personas o daño que crece rápido' },
+  media: { label: 'Media', color: '#b86e00', hint: 'Requiere atención pronta' },
+  baja:  { label: 'Baja',  color: '#238a50', hint: 'Molestia que puede esperar' }
 };
 const STATUS = { pendiente: 'Pendiente', proceso: 'En proceso', resuelto: 'Resuelto' };
 
@@ -32,14 +32,18 @@ const MAX_KM_FROM_CENTER = 20; // límite para aceptar un punto como "dentro de 
 let nextId = 7;
 
 const ZONES = [
-  { name: 'Centro', note: 'Parque Central y Av. Central', c1: '#e9b45f', c2: '#7a3b2e', shape: 'plaza' },
-  { name: 'Cañón del Sumidero', note: 'Ruta del río Grijalva', c1: '#d9a45b', c2: '#16233b', shape: 'canon' },
-  { name: 'Parque de la Marimba', note: 'Punto de encuentro de la ciudad', c1: '#7fc8a9', c2: '#1b5e4b', shape: 'marimba' }
+  { name: 'Centro', note: 'Parque Central y Av. Central', img: 'img/zona-centro.webp', alt: 'Palomas volando frente a la torre del reloj en el Parque Central' },
+  { name: 'Cañón del Sumidero', note: 'Ruta del río Grijalva', img: 'img/zona-sumidero.webp', alt: 'Río entre las paredes verdes del Cañón del Sumidero' },
+  { name: 'Parque de la Marimba', note: 'Punto de encuentro de la ciudad', img: 'img/zona-marimba.webp', alt: 'Personas bailando junto al kiosco del Parque de la Marimba' }
 ];
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+/* aria-pressed sincronizado con la clase is-on en botones tipo interruptor (filtros, categorías, urgencia, pestañas) */
+const syncPressed = () => $$('.chip,.pick,.urg-row button,.tab').forEach(b => b.setAttribute('aria-pressed', b.classList.contains('is-on')));
+new MutationObserver(syncPressed).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'], childList: true });
+$('#skip').addEventListener('click', e => { e.preventDefault(); $('#main').focus(); });
 const icon = id => `<svg class="ico"><use href="#${id}"/></svg>`;
 
 function toast(msg) {
@@ -53,36 +57,36 @@ $$('[data-soon]').forEach(b => b.addEventListener('click', () => toast('Esta opc
 
 /* ---------- Router ---------- */
 const ROUTES = ['inicio', 'reportar', 'mapa', 'comunidad', 'mis-reportes'];
+const TITLES = { inicio: 'Inicio', reportar: 'Nuevo reporte', mapa: 'Mapa de incidencias', comunidad: 'Comunidad', 'mis-reportes': 'Mis reportes' };
+let firstRoute = true;
 function route() {
   const r = ROUTES.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'inicio';
   $$('.page').forEach(p => p.classList.toggle('is-active', p.id === 'page-' + r));
-  $$('#nav a').forEach(a => a.classList.toggle('is-active', a.dataset.route === r));
+  $$('#nav a').forEach(a => {
+    const on = a.dataset.route === r;
+    a.classList.toggle('is-active', on);
+    if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
+  document.title = `${TITLES[r]} · CityTux`;
   window.scrollTo(0, 0);
   if (r === 'inicio') paintStats();
   if (r === 'mapa') initMainMap();
   if (r === 'reportar') { initPickMap(); paintForm(); }
   if (r === 'comunidad') renderFeed();
   if (r === 'mis-reportes') renderMine();
+  if (!firstRoute) { const h1 = $('#page-' + r + ' h1'); if (h1) { h1.tabIndex = -1; h1.focus({ preventScroll: true }); } }
+  firstRoute = false;
 }
 window.addEventListener('hashchange', route);
 
 /* ---------- Inicio ---------- */
 $('#homeCats').innerHTML = Object.entries(CATS).map(([k, c]) => `
-  <a class="cat" href="#reportar" data-cat="${k}" style="--c:${c.color}">
-    <span class="cat__ico">${icon(c.icon)}</span>${c.label}
+  <a class="cat" href="#reportar" data-cat="${k}">
+    <span class="cat__ico"><img src="${c.img}" alt="" decoding="async"></span>${c.label}
   </a>`).join('');
 $$('#homeCats .cat').forEach(a => a.addEventListener('click', () => { state.cat = a.dataset.cat; state.step = 0; }));
 
-function zoneArt(z) {
-  const base = `<defs><linearGradient id="g-${z.shape}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${z.c1}"/><stop offset="1" stop-color="${z.c2}"/></linearGradient></defs><rect width="400" height="130" fill="url(#g-${z.shape})"/>`;
-  const art = {
-    plaza: `<path d="M0 130V92h60V70h26v22h40V60l30-22 30 22v32h50V78h30V50h24v28h30v14h80v38z" fill="#2a1612" opacity=".85"/><path d="M180 60l30-22 30 22" stroke="#f3d79a" stroke-width="3" fill="none"/><rect x="196" y="76" width="28" height="54" fill="#f3d79a" opacity=".55"/>`,
-    canon: `<path d="M0 130V20l50 18 24 50 36 8 20 34z" fill="#0c1424"/><path d="M400 130V12l-60 24-30 56-44 10-14 28z" fill="#0c1424"/><path d="M120 130l40-14h120l40 14z" fill="#1c5a63"/>`,
-    marimba: `<g fill="#0e3a2e"><circle cx="70" cy="62" r="34"/><circle cx="330" cy="58" r="40"/><rect x="66" y="80" width="8" height="50"/><rect x="326" y="84" width="8" height="46"/></g><rect x="130" y="82" width="140" height="10" rx="4" fill="#f3d79a"/><rect x="140" y="92" width="6" height="38" fill="#f3d79a"/><rect x="254" y="92" width="6" height="38" fill="#f3d79a"/><path d="M130 82l70-34 70 34z" fill="#c9553d"/>`
-  };
-  return `<svg viewBox="0 0 400 130" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${base}${art[z.shape]}</svg>`;
-}
-$('#zones').innerHTML = ZONES.map(z => `<article class="zone">${zoneArt(z)}<div><strong>${z.name}</strong><span>${z.note}</span></div></article>`).join('');
+$('#zones').innerHTML = ZONES.map(z => `<article class="zone"><img src="${z.img}" alt="${esc(z.alt)}" width="720" height="340" loading="lazy"><div><strong>${z.name}</strong><span>${z.note}</span></div></article>`).join('');
 
 function paintStats() {
   const act = REPORTS.filter(r => r.status !== 'resuelto').length;
@@ -106,8 +110,8 @@ function countUp() {
 const TILES = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const ATTR = '&copy; Colaboradores de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
-function pinIcon(color) {
-  return L.divIcon({ className: '', html: `<span class="pin" style="--c:${color}"></span>`, iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -28] });
+function pinIcon(color, letra = '') {
+  return L.divIcon({ className: '', html: `<span class="pin" style="--c:${color}">${letra ? `<b>${letra}</b>` : ''}</span>`, iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -28] });
 }
 function makeMap(id, zoom) {
   const m = L.map(id, { scrollWheelZoom: true }).setView(TUXTLA, zoom);
@@ -119,7 +123,7 @@ let mainMap, mainLayer, mapFilter = 'todas', focusId = null, markers = {};
 function drawMain() {
   mainLayer.clearLayers(); markers = {};
   REPORTS.filter(r => mapFilter === 'todas' || r.urg === mapFilter).forEach(r => {
-    markers[r.id] = L.marker(r.pos, { icon: pinIcon(URG[r.urg].color) }).addTo(mainLayer)
+    markers[r.id] = L.marker(r.pos, { icon: pinIcon(URG[r.urg].color, URG[r.urg].label[0]) }).addTo(mainLayer)
       .bindPopup(`<div class="pop"><strong>${esc(r.title)}</strong><small>${esc(r.place)}<br>Urgencia ${URG[r.urg].label.toLowerCase()} · ${r.neighbors} vecinos</small></div>`);
   });
 }
@@ -146,7 +150,7 @@ const state = { step: 0, cat: null, urg: 'media', desc: '', addr: '', pos: null,
 let pickMap, pickMarker;
 
 $('#pickCats').innerHTML = Object.entries(CATS).map(([k, c]) =>
-  `<button type="button" class="pick" data-cat="${k}">${icon(c.icon)}${c.label}</button>`).join('');
+  `<button type="button" class="pick" data-cat="${k}"><img src="${c.img}" alt="" decoding="async">${c.label}</button>`).join('');
 $('#pickCats').addEventListener('click', e => {
   const b = e.target.closest('.pick'); if (!b) return;
   state.cat = b.dataset.cat; paintForm();
@@ -161,7 +165,7 @@ $('#addr').addEventListener('input', e => { state.addr = e.target.value; });
 function setPoint(latlng, geocode = true) {
   state.pos = [latlng.lat, latlng.lng];
   if (pickMarker) pickMarker.setLatLng(latlng);
-  else pickMarker = L.marker(latlng, { icon: pinIcon('#2fb36d') }).addTo(pickMap);
+  else pickMarker = L.marker(latlng, { icon: pinIcon('#c2410c') }).addTo(pickMap);
   if (geocode) reverseGeocode(latlng);
 }
 let geoSeq = 0;
@@ -223,6 +227,7 @@ function paintForm() {
   $$('.step').forEach(s => s.hidden = +s.dataset.step !== state.step);
   $$('#stepper li').forEach((li, i) => {
     li.classList.toggle('is-on', i === state.step);
+    if (i === state.step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
     li.classList.toggle('is-done', i < state.step);
   });
   $('#btnBack').style.visibility = state.step === 0 ? 'hidden' : 'visible';
@@ -283,12 +288,12 @@ function renderFeed() {
   $('#feed').innerHTML = list.map(r => {
     const c = CATS[r.cat], init = r.author.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const media = r.photo
-      ? `<div class="post__img" style="background:#000"><img src="${r.photo}" alt="" style="width:100%;height:100%;object-fit:cover"><span>${icon(c.icon)}${c.label}</span></div>`
-      : `<div class="post__img" style="--c:${c.color}">${icon(c.icon)}<span>${icon(c.icon)}${c.label}</span></div>`;
+      ? `<div class="post__img post__img--photo"><img src="${r.photo}" alt="Foto del reporte"><span>${icon(c.icon)}${c.label}</span></div>`
+      : `<div class="post__img"><img class="cat-img" src="${c.img}" alt=""><span>${icon(c.icon)}${c.label}</span></div>`;
     const on = joined.has(r.id), own = MINE.includes(r.id);
     return `<article class="post">
       <div class="post__head"><div class="avatar">${init}</div>
-        <div class="post__who"><strong>${esc(r.author)}</strong><span class="badge badge--${r.urg}">${URG[r.urg].label}</span>
+        <div class="post__who"><strong>${esc(r.author)}</strong><span class="badge badge--${r.urg}">${icon('i-' + r.urg)}${URG[r.urg].label}</span>
         <small>${icon(c.icon)}${c.label} · ${r.date}</small></div></div>
       ${media}
       <div class="post__loc">${icon('i-pin')}${esc(r.place)}</div>
@@ -348,10 +353,10 @@ function renderMine() {
   $('#myList').innerHTML = rows.map(r => {
     const c = CATS[r.cat];
     return `<article class="item">
-      <div class="item__img" style="--c:${c.color}">${r.photo ? `<img src="${r.photo}" alt="">` : icon(c.icon)}</div>
+      <div class="item__img">${r.photo ? `<img src="${r.photo}" alt="Foto del reporte">` : `<img class="cat-img" src="${c.img}" alt="">`}</div>
       <span class="item__bar" style="--u:${URG[r.urg].color}"></span>
       <div class="item__main"><strong>${esc(r.title)}</strong><small>${esc(r.place)}</small><small>${r.date}</small></div>
-      <span class="status status--${r.status}">${STATUS[r.status]}</span></article>`;
+      <span class="status status--${r.status}">${icon('i-' + r.status)}${STATUS[r.status]}</span></article>`;
   }).join('') || '<p class="empty">No tienes reportes en este estado.</p>';
 }
 $('#myTabs').addEventListener('click', e => {
@@ -363,4 +368,4 @@ $('#myTabs').addEventListener('click', e => {
 paintForm();
 route();
 
-/* Foto real de Tuxtla (opcional): coloca img/tuxtla.jpg y agrega la clase has-photo a <div class="hero"> en index.html */
+syncPressed();

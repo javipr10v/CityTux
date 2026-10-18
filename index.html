@@ -4,15 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CityTux — Tu ciudad, en tus manos</title>
+  <meta name="theme-color" content="#0f2a4a">
   <meta name="description" content="Reporta baches, fugas, luminarias y más en Tuxtla Gutiérrez y da seguimiento a su estado.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%8D%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="preload" as="image" href="img/hero.webp" media="(min-width:701px)">
+  <link rel="preload" as="image" href="img/hero-800.webp" media="(max-width:700px)">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+<a class="skip" id="skip" href="#">Saltar al contenido</a>
 
 <!-- Íconos SVG -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -36,6 +40,13 @@
     <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
     <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol>
+    <symbol id="i-asistente" viewBox="0 0 24 24"><path d="M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-4.5 3.5V17H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M12 14s3.3-2.7 3.3-5.3a3.3 3.3 0 0 0-6.6 0C8.7 11.3 12 14 12 14z"/><circle cx="12" cy="8.7" r="1.1"/></symbol>
+    <symbol id="i-alta" viewBox="0 0 24 24"><path d="M8.5 3h7L21 8.5v7L15.5 21h-7L3 15.5v-7z"/><path d="M12 8v5"/><path d="M12 16.2v.01"/></symbol>
+    <symbol id="i-media" viewBox="0 0 24 24"><path d="M12 3.2l9.5 16.6h-19z"/><path d="M12 10v4"/><path d="M12 17v.01"/></symbol>
+    <symbol id="i-baja" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8v.01"/></symbol>
+    <symbol id="i-pendiente" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-proceso" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-14 5.3"/><path d="M4 12a8 8 0 0 1 14-5.3"/><path d="M18.5 3v4h-4M5.5 21v-4h4"/></symbol>
+    <symbol id="i-resuelto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
   </defs>
 </svg>
 
@@ -59,31 +70,10 @@
   </div>
 </header>
 
-<main>
+<main id="main" tabindex="-1">
   <!-- INICIO -->
   <section class="page" id="page-inicio">
     <div class="hero">
-      <div class="hero__art" aria-hidden="true">
-        <svg viewBox="0 0 1600 520" preserveAspectRatio="xMidYMax slice">
-          <defs>
-            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#0b1a38"/><stop offset=".6" stop-color="#27456f"/><stop offset="1" stop-color="#d9a45b"/>
-            </linearGradient>
-            <linearGradient id="river" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#1c5a63"/><stop offset="1" stop-color="#0d2f3c"/>
-            </linearGradient>
-          </defs>
-          <rect width="1600" height="520" fill="url(#sky)"/>
-          <path d="M0 520V170l90 20 60 90 70 10 40 110 60 30 20 90z" fill="#0c1424"/>
-          <path d="M1600 520V120l-120 40-70 100-80 20-50 120-90 30-30 90z" fill="#0c1424"/>
-          <path d="M0 520V260l120 40 60 70 90 20 40 130z" fill="#16233b"/>
-          <path d="M1600 520V230l-140 50-60 80-110 30-40 130z" fill="#16233b"/>
-          <path d="M270 520l120-40h820l120 40z" fill="url(#river)"/>
-          <g stroke="#f3d79a" stroke-opacity=".35" stroke-width="2" fill="none">
-            <path d="M420 500h200M700 495h300M1050 502h160"/>
-          </g>
-        </svg>
-      </div>
       <div class="hero__content">
         <p class="hero__place">Tuxtla Gutiérrez, Chiapas</p>
         <h1>Haz de Tuxtla<br>una mejor ciudad</h1>
@@ -128,9 +118,9 @@
           <div class="pick-grid" id="pickCats"></div>
           <h3>Nivel de urgencia</h3>
           <div class="urg-row" id="pickUrg">
-            <button type="button" data-u="alta">Alta</button>
-            <button type="button" data-u="media" class="is-on">Media</button>
-            <button type="button" data-u="baja">Baja</button>
+            <button type="button" data-u="alta"><svg class="ico"><use href="#i-alta"/></svg>Alta</button>
+            <button type="button" data-u="media" class="is-on"><svg class="ico"><use href="#i-media"/></svg>Media</button>
+            <button type="button" data-u="baja"><svg class="ico"><use href="#i-baja"/></svg>Baja</button>
           </div>
           <p class="hint" id="urgHint">Requiere atención pronta</p>
           <h3>Descripción</h3>
@@ -154,7 +144,7 @@
             <svg class="ico ico--lg"><use href="#i-camera"/></svg>
             <strong>Arrastra o selecciona fotos</strong>
             <small>PNG, JPG hasta 10 MB</small>
-            <input id="files" type="file" accept="image/png,image/jpeg" multiple hidden>
+            <input id="files" type="file" accept="image/png,image/jpeg" multiple class="sr-only">
           </label>
           <div class="thumbs" id="thumbs"></div>
         </div>
@@ -228,14 +218,21 @@
   </section>
 </main>
 
+<footer class="footer">
+  <div class="footer__inner">
+    <p><strong>CityTux</strong> · Reportes ciudadanos para Tuxtla Gutiérrez, Chiapas</p>
+    <p>Foto del Parque Central: Jovanny Esteban Moreno · Mapa © colaboradores de <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
+  </div>
+</footer>
+
 <!-- Chatbot -->
-<button class="chat-fab" id="chatFab" aria-label="Abrir asistente"><svg class="ico"><use href="#i-chat"/></svg></button>
+<button class="chat-fab" id="chatFab" aria-label="Abrir asistente" aria-expanded="false" aria-controls="chat"><svg class="ico"><use href="#i-asistente"/></svg></button>
 <aside class="chat" id="chat" hidden aria-label="Asistente CityTux">
   <header class="chat__head">
-    <div><strong>Asistente CityTux</strong><small>Resuelve tus dudas al momento</small></div>
+    <div class="chat__who"><span class="chat__avatar"><svg class="ico"><use href="#i-asistente"/></svg></span><div><strong>Asistente CityTux</strong><small>Resuelve tus dudas al momento</small></div></div>
     <button class="icon-btn" id="chatClose" aria-label="Cerrar"><svg class="ico"><use href="#i-close"/></svg></button>
   </header>
-  <div class="chat__body" id="chatBody"></div>
+  <div class="chat__body" id="chatBody" role="log" aria-live="polite"></div>
   <div class="chat__chips" id="chatChips"></div>
   <form class="chat__form" id="chatForm" autocomplete="off">
     <input id="chatInput" type="text" placeholder="Escribe tu duda…" aria-label="Mensaje">
