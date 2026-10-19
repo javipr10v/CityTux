@@ -1,5 +1,5 @@
 /* Reglas de negocio de los reportes. Funciones puras: no tocan el DOM, el mapa ni la red. */
-import { CATEGORIES } from '../config/categories.js';
+import { findSubcategory } from './catalog.js';
 import {
   ACCEPTED_PHOTO_TYPES, DEFAULT_URGENCY, JOIN_RADIUS_KM, MAX_PHOTO_MB, MAX_PHOTOS
 } from '../config/settings.js';
@@ -13,7 +13,7 @@ export const emptyDraft = () => ({
 
 /** Devuelve el mensaje de error del paso actual, o null si se puede continuar. */
 export function validateStep(draft) {
-  if (draft.step === 0 && !draft.cat) return 'Elige el tipo de incidencia para continuar.';
+  if (draft.step === 0 && !findSubcategory(draft.cat)) return 'Elige el problema que quieres reportar para continuar.';
   if (draft.step === 1 && !draft.pos) return 'Marca el punto exacto en el mapa (o usa "Mi ubicación").';
   if (draft.step === 1 && !isInsideCity(draft.pos)) return 'Ese punto queda fuera de Tuxtla Gutiérrez. Marca uno dentro de la ciudad.';
   return null;
@@ -44,7 +44,7 @@ export function buildReport(draft, { id, author = 'Tú', now = new Date() }) {
     cat: draft.cat,
     urg: draft.urg,
     status: 'pendiente',
-    title: CATEGORIES[draft.cat].single,
+    title: findSubcategory(draft.cat).label,
     place: draft.addr.trim() || 'Ubicación marcada en el mapa',
     pos: draft.pos,
     date: formatDate(now),

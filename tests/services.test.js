@@ -33,11 +33,11 @@ test('mine: solo los del usuario, con conteo por estado', async () => {
 
 test('submit: rechaza borradores incompletos y guarda los válidos', async () => {
   const s = nuevoServicio();
-  await assert.rejects(() => s.submit(emptyDraft()), /Elige el tipo/);
-  await assert.rejects(() => s.submit({ ...emptyDraft(), cat: 'bache' }), /Marca el punto/);
-  await assert.rejects(() => s.submit({ ...emptyDraft(), cat: 'bache', pos: LEJOS }), /fuera de Tuxtla/);
+  await assert.rejects(() => s.submit(emptyDraft()), /Elige el problema/);
+  await assert.rejects(() => s.submit({ ...emptyDraft(), cat: 'baches' }), /Marca el punto/);
+  await assert.rejects(() => s.submit({ ...emptyDraft(), cat: 'baches', pos: LEJOS }), /fuera de Tuxtla/);
   const r = await s.submit({ ...emptyDraft(), cat: 'inundacion', pos: CENTRO });
-  assert.equal(r.title, 'Inundación');
+  assert.equal(r.title, 'Inundaciones y encharcamientos');
   assert.equal(r.id, 7);
   assert.equal((await s.mine()).items[0].id, 7);
   assert.equal((await s.stats()).activos, 6);

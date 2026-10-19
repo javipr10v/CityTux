@@ -22,8 +22,8 @@ test('geo: puntos dentro y fuera de Tuxtla', () => {
 
 test('formulario: validación de cada paso', () => {
   const d = emptyDraft();
-  assert.match(validateStep(d), /Elige el tipo/);
-  assert.equal(validateStep({ ...d, cat: 'bache' }), null);
+  assert.match(validateStep(d), /Elige el problema/);
+    assert.equal(validateStep({ ...d, cat: 'baches' }), null);
   assert.match(validateStep({ ...d, step: 1 }), /Marca el punto/);
   assert.match(validateStep({ ...d, step: 1, pos: [17.9, -92.9] }), /fuera de Tuxtla/);
   assert.equal(validateStep({ ...d, step: 1, pos: CENTRO }), null);
@@ -42,15 +42,15 @@ test('fotos: tipo, peso y límite', () => {
 test('reporte: construcción desde el borrador', () => {
   const base = { ...emptyDraft(), cat: 'inundacion', pos: CENTRO, addr: '  Calle Prueba  ', desc: 'Se inunda', photos: ['f1', 'f2'] };
   const r = buildReport(base, { id: 7, now: new Date(2026, 8, 5) });
-  assert.equal(r.title, 'Inundación');
+  assert.equal(r.title, 'Inundaciones y encharcamientos');
   assert.equal(r.place, 'Calle Prueba');
   assert.equal(r.date, '05/09/2026');
   assert.equal(r.status, 'pendiente');
   assert.equal(r.neighbors, 1);
   assert.equal(r.photo, 'f1');
   assert.deepEqual(r.photos, ['f1', 'f2']);
-  const vacio = buildReport({ ...emptyDraft(), cat: 'residuos', pos: CENTRO }, { id: 8 });
-  assert.equal(vacio.title, 'Gestión de residuos');
+  const vacio = buildReport({ ...emptyDraft(), cat: 'limpia', pos: CENTRO }, { id: 8 });
+  assert.equal(vacio.title, 'Limpia y Aseo Público');
   assert.equal(vacio.place, 'Ubicación marcada en el mapa');
   assert.equal(vacio.text, 'Sin descripción');
   assert.equal(vacio.photo, undefined);

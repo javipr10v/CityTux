@@ -1,19 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
-import { CATEGORIES } from '../js/config/categories.js';
+import { SERVICES } from '../js/config/services.js';
 import { URGENCY, STATUS } from '../js/config/levels.js';
 import { ZONES } from '../js/config/zones.js';
 
 const raiz = new URL('../', import.meta.url);
 const existe = ruta => existsSync(new URL(ruta, raiz));
 
-test('cada categoría tiene todos sus campos y su imagen existe', () => {
-  assert.equal(Object.keys(CATEGORIES).length, 8);
-  for (const [id, c] of Object.entries(CATEGORIES)) {
-    for (const campo of ['label', 'single', 'icon', 'img']) assert.ok(c[campo], `${id} no tiene "${campo}"`);
-    assert.ok(existe(c.img), `Falta la imagen ${c.img}`);
+test('cada servicio tiene nombre, descripción, ícono y subcategorías', () => {
+  assert.deepEqual(Object.keys(SERVICES), ['municipales', 'agua', 'transito']);
+  for (const [id, s] of Object.entries(SERVICES)) {
+    for (const campo of ['label', 'description', 'icon']) assert.ok(s[campo], `${id} no tiene "${campo}"`);
+    assert.ok(Object.keys(s.subs).length > 0, `${id} no tiene subcategorías`);
+    if (s.img) assert.ok(existe(s.img), `Falta la imagen ${s.img}`); // las imágenes definitivas están pendientes
   }
+});
+
+test('el catálogo no menciona SMAPA (decisión del proyecto)', () => {
+  assert.doesNotMatch(JSON.stringify(SERVICES), /smapa/i);
 });
 
 test('cada zona tiene imagen existente y texto alternativo', () => {
